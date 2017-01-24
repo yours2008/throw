@@ -1,6 +1,6 @@
 ## -*- coding: utf-8 -*-  
+#
 #上文是解决中文不出错
-
 
 #下文 是解决ExcelWriter写入中文的时候不出错
 import sys
@@ -12,16 +12,19 @@ import pandas as pd
 import numpy as np
 
 #init set parama
-START_DATE='2012-01-23'
-END_DATE='2017-01-01'
-amount=10000
+START_DATE	=	'2012-01-23'
+END_DATE  	=	'2017-01-01'
+amount		=	10000
+STOP_PROFIT_THRESHOLD	=	0.5  	#止盈门槛
+STOP_PROFIT_RATIO		=	0.5		#止盈率
 
-# codes=['600036','600150','600446','600519','600570','600887','600999','601668','601989','000002','000423','000651','600048','600104','600547','600683','600820','000333','000568','000858','300003']
-# names=['招商银行','中国船舶','金证股份','贵州茅台','恒生电子','伊利股份','招商证券','中国建筑','中国重工','万科A','东阿阿胶','格力电器','保利地产','上汽集团','山东黄金','京投发展','隧道股份','美的集团','泸州老窖','五粮液','乐普医疗']
+
+# codes=['600036','600150','600446','600519','600570','600887','600999','600109',601668','601989','000002','000423','000651','600048','600104','600547','600683','600820','000333','000568','000858','300003']
+# names=['招商银行','中国船舶','金证股份','贵州茅台','恒生电子','伊利股份','招商证券','国金证券','中国建筑','中国重工','万科A','东阿阿胶','格力电器','保利地产','上汽集团','山东黄金','京投发展','隧道股份','美的集团','泸州老窖','五粮液','乐普医疗']
 
 
-codes=['600036','600150']
-names=['招商银行','中国船舶']
+codes=['600036','600150','600109']
+names=['招商银行','中国船舶','国金证券']
 
 RESULT_EXCEL_FILENAME='Throw_Result.xlsx'
 
@@ -35,18 +38,18 @@ RESULT_EXCEL_FILENAME='Throw_Result.xlsx'
 # print ds1.iloc[1,1]
 
 def oneMonth(ds1,i,result):
-	data= ds1.iloc[i,0]
-	close = ds1.iloc[i,2]
-	result[i][0]=data
-	result[i][1]=close
-	result[i][2]=amount
-	result[i][3]=result[i-1][3]+amount
+	data= ds1.iloc[i,0]           	#日期
+	close = ds1.iloc[i,2]         	#收盘价
+	result[i][0]=data             	#日期
+	result[i][1]=close				#收盘价
+	result[i][2]=amount				#每月定投金额
+	result[i][3]=result[i-1][3]+amount#投资金额合计
 
-	result[i][4]=amount/close
-	result[i][5]=result[i-1][5]+result[i][4]
+	result[i][4]=amount/close#股票当期份额
+	result[i][5]=result[i-1][5]+result[i][4]#股票总市值
 
-	result[i][6]=result[i][5]*close
-	result[i][7]=result[i][6]/result[i][3]-1
+	result[i][6]=result[i][5]*close#投资收益比率
+	result[i][7]=result[i][6]/result[i][3]-1#股票合计份额
 	return result
 
 def firstMonth(ds1,result):
@@ -68,7 +71,7 @@ writer = pd.ExcelWriter(RESULT_EXCEL_FILENAME, engine='xlsxwriter')
 # 	print START_DATE
 # 	print codes
 
-def doit(i):
+def do_simple_it(i):     #定期定投  没有退出策略
 	print (codes[i])
 	ds1=ts.get_k_data(codes[i],start=START_DATE, end=END_DATE, ktype='M', autype='qfq')
 	result=[["",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0] for j in range(ds1.index.size)]
@@ -86,7 +89,7 @@ def doit(i):
 	return
 
 for i in range(0,len(codes)):
-	doit(i)
+	do_simple_it(i)
 	
 
 writer.save()	
