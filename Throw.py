@@ -15,18 +15,19 @@ import numpy as np
 START_DATE	=	'2012-01-23'
 END_DATE  	=	'2017-01-01'
 amount		=	10000
+RESULT_EXCEL_FILENAME='Throw_Result.xlsx'
+
+#退出机制参数
 STOP_PROFIT_THRESHOLD	=	0.5  	#止盈门槛
 STOP_PROFIT_RATIO		=	0.5		#止盈率
 
-
+#实际执行时选择的数据
 # codes=['600036','600150','600446','600519','600570','600887','600999','600109',601668','601989','000002','000423','000651','600048','600104','600547','600683','600820','000333','000568','000858','300003']
 # names=['招商银行','中国船舶','金证股份','贵州茅台','恒生电子','伊利股份','招商证券','国金证券','中国建筑','中国重工','万科A','东阿阿胶','格力电器','保利地产','上汽集团','山东黄金','京投发展','隧道股份','美的集团','泸州老窖','五粮液','乐普医疗']
-
-
 codes=['600036','600150','600109']
 names=['招商银行','中国船舶','国金证券']
 
-RESULT_EXCEL_FILENAME='Throw_Result.xlsx'
+
 
 # 数据结构测试数据可以删除
 # print ds1  #pandas.DataFrame
@@ -36,21 +37,6 @@ RESULT_EXCEL_FILENAME='Throw_Result.xlsx'
 # print ds1.iloc[0,2]
 # print ds1.iloc[0,1]
 # print ds1.iloc[1,1]
-
-def oneMonth(ds1,i,result):
-	data= ds1.iloc[i,0]           	#日期
-	close = ds1.iloc[i,2]         	#收盘价
-	result[i][0]=data             	#日期
-	result[i][1]=close				#收盘价
-	result[i][2]=amount				#每月定投金额
-	result[i][3]=result[i-1][3]+amount#投资金额合计
-
-	result[i][4]=amount/close#股票当期份额
-	result[i][5]=result[i-1][5]+result[i][4]#股票总市值
-
-	result[i][6]=result[i][5]*close#投资收益比率
-	result[i][7]=result[i][6]/result[i][3]-1#股票合计份额
-	return result
 
 def firstMonth(ds1,result):
 	data= ds1.iloc[0,0]
@@ -65,11 +51,18 @@ def firstMonth(ds1,result):
 	result[0][7]=result[0][6]/result[0][3]-1
 	return result
 
-writer = pd.ExcelWriter(RESULT_EXCEL_FILENAME, engine='xlsxwriter')
-
-# def test():
-# 	print START_DATE
-# 	print codes
+def oneMonth(ds1,i,result):
+	data= ds1.iloc[i,0]           	#日期
+	close = ds1.iloc[i,2]         	#收盘价
+	result[i][0]=data             	#日期
+	result[i][1]=close				#收盘价
+	result[i][2]=amount				#每月定投金额
+	result[i][3]=result[i-1][3]+amount#投资金额合计
+	result[i][4]=amount/close#股票当期份额
+	result[i][5]=result[i-1][5]+result[i][4]#股票总市值
+	result[i][6]=result[i][5]*close#投资收益比率
+	result[i][7]=result[i][6]/result[i][3]-1#股票合计份额
+	return result
 
 def do_simple_it(i):     #定期定投  没有退出策略
 	print (codes[i])
@@ -88,9 +81,15 @@ def do_simple_it(i):     #定期定投  没有退出策略
 	df.to_excel(writer, sheet_name=names[i])
 	return
 
+
+
+
+
+
+
+#执行主程序
+writer = pd.ExcelWriter(RESULT_EXCEL_FILENAME, engine='xlsxwriter')
 for i in range(0,len(codes)):
 	do_simple_it(i)
-	
-
 writer.save()	
 # test()
